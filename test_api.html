@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<body>
+    <h1>KIỂM TRA KẾT NỐI API</h1>
+    <button onclick="testConnection()">Bấm vào đây để test</button>
+    <div id="result" style="margin-top: 20px; border: 1px solid #333; padding: 10px;">Chờ kết quả...</div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "⏳ Đang gọi API...";
+            
+            try {
+                // Gọi trực tiếp vào API sản phẩm
+                const response = await fetch('http://localhost:3000/api/products');
+                
+                resultDiv.innerHTML += "<br>📡 Trạng thái Server: " + response.status;
+
+                if (!response.ok) {
+                    throw new Error("Lỗi HTTP: " + response.status);
+                }
+
+                const data = await response.json();
+                resultDiv.innerHTML += "<br>✅ Kết nối thành công!";
+                resultDiv.innerHTML += "<br>📦 Dữ liệu nhận được: <pre>" + JSON.stringify(data, null, 2) + "</pre>";
+                
+            } catch (error) {
+                resultDiv.innerHTML += "<br>❌ LỖI KẾT NỐI: " + error.message;
+                resultDiv.innerHTML += "<br>💡 Gợi ý: Kiểm tra xem Server có đang chạy không?";
+            }
+        }
+    </script>
+</body>
+</html>

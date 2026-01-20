@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng & Đơn hàng - Tea&Tea</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { font-family: 'Nunito', sans-serif; background-color: #f8f9fa; }
+        
+        /* CSS riêng cho phần Đơn hàng */
+        .order-history-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .order-card {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .order-card:hover {
+            border-color: #00b894;
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.1);
+        }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+        .status-pending { background-color: #ffeaa7; color: #d35400; }
+        .status-shipping { background-color: #74b9ff; color: #0984e3; }
+        .status-completed { background-color: #55efc4; color: #00b894; }
+        .status-cancelled { background-color: #ff7675; color: #d63031; }
+        
+        .cart-item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-success fs-3" href="index.html">
+                <i class="fas fa-leaf me-2"></i>Tea&Tea
+            </a>
+            <div class="ms-auto">
+                <a href="index.html" class="btn btn-outline-secondary rounded-pill">
+                    <i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <h4 class="fw-bold mb-4">Giỏ hàng của bạn</h4>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3">Món</th>
+                                        <th>Giá</th>
+                                        <th>SL</th>
+                                        <th>Tổng</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-4 sticky-top" style="top: 100px;">
+                    <h5 class="fw-bold mb-3">Thông tin thanh toán</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tạm tính:</span>
+                        <span class="fw-bold" id="subtotal-price">0 đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="text-muted">Giảm giá:</span>
+                        <span class="text-success">-0 đ</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="h5 fw-bold">Tổng cộng:</span>
+                        <span class="h4 fw-bold text-success" id="total-price">0 đ</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Địa chỉ giao hàng (*)</label>
+                        <textarea id="address" class="form-control" rows="2" placeholder="Số nhà, đường, phường..."></textarea>
+                    </div>
+
+                    <button class="btn btn-success w-100 py-3 fw-bold rounded-3" onclick="checkout()">
+                        <i class="fas fa-check-circle me-2"></i>XÁC NHẬN ĐẶT HÀNG
+                    </button>
+                    <p class="text-center text-muted mt-3 small">Thanh toán khi nhận hàng (COD)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-history-section" id="order-history-container" style="display: none;">
+            <div class="d-flex align-items-center mb-4">
+                <h3 class="fw-bold m-0"><i class="fas fa-history me-2 text-primary"></i>Lịch Sử Đơn Hàng</h3>
+                <button class="btn btn-sm btn-outline-primary ms-auto" onclick="loadMyOrders()">
+                    <i class="fas fa-sync-alt me-1"></i>Làm mới
+                </button>
+            </div>
+            
+            <div id="my-orders-list">
+                <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/client.js"></script>
+    <script>
+        // --- LOGIC GIỎ HÀNG (GIỮ NGUYÊN) ---
+        function renderCart() {
+            const tbody = document.getElementById('cart-body');
+            tbody.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Giỏ hàng trống! Hãy quay lại chọn món nhé.</td></tr>';
+                document.getElementById('subtotal-price').innerText = formatMoney(0);
+                document.getElementById('total-price').innerText = formatMoney(0);
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                const subtotal = item.price * item.quantity;
+                total += subtotal;
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <img src="${item.imgUrl || 'https://placehold.co/60'}" class="cart-item-img me-3">
+                                <div><h6 class="mb-0 fw-bold">${item.name}</h6></div>
+                            </div>
+                        </td>
+                        <td>${formatMoney(item.price)}</td>
+                        <td>
+                            <div class="input-group input-group-sm" style="width: 90px;">
+                                <button class="btn btn-outline-secondary" onclick="changeQty(${index}, -1)">-</button>
+                                <input type="text" class="form-control text-center bg-white" value="${item.quantity}" readonly>
+                                <button class="btn btn-outline-secondary" onclick="changeQty(${index}, 1)">+</button>
+                            </div>
+                        </td>
+                        <td class="fw-bold text-success">${formatMoney(subtotal)}</td>
+                        <td class="text-end pe-4">
+                            <button class="btn text-danger" onclick="removeItem(${index})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('subtotal-price').innerText = formatMoney(total);
+            document.getElementById('total-price').innerText = formatMoney(total);
+        }
+
+        function changeQty(index, delta) {
+            cart[index].quantity += delta;
+            if (cart[index].quantity < 1) cart[index].quantity = 1;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+            updateCartUI();
+        }
+
+        function removeItem(index) {
+            if(confirm('Xóa món này?')) {
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+                updateCartUI();
+            }
+        }
+
+        async function checkout() {
+            if (!isLoggedIn()) {
+                alert('Vui lòng đăng nhập để đặt hàng!');
+                window.location.href = 'login.html';
+                return;
+            }
+            if (cart.length === 0) return alert('Giỏ hàng trống!');
+            
+            const address = document.getElementById('address').value.trim();
+            if (!address) return alert('Vui lòng nhập địa chỉ!');
+
+            const btn = document.querySelector('button[onclick="checkout()"]');
+            btn.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Đang xử lý...';
+            btn.disabled = true;
+
+            try {
+                const items = cart.map(c => ({ productId: c.id, quantity: c.quantity }));
+                const res = await fetchAPI('/orders', 'POST', { shippingAddress: address, items: items });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert('🎉 Đặt hàng thành công!');
+                    localStorage.removeItem('cart');
+                    // Thay vì chuyển trang, ta load lại trang để hiện đơn hàng ở dưới
+                    location.reload(); 
+                } else {
+                    alert('Lỗi: ' + data.message);
+                    btn.innerHTML = 'XÁC NHẬN ĐẶT HÀNG';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert('Lỗi kết nối!');
+                btn.innerHTML = 'XÁC NHẬN ĐẶT HÀNG';
+                btn.disabled = false;
+            }
+        }
+
+        // --- LOGIC LỊCH SỬ ĐƠN HÀNG (ĐÃ SỬA API) ---
+        async function loadMyOrders() {
+            const container = document.getElementById('order-history-container');
+            const listContainer = document.getElementById('my-orders-list');
+            
+            if (!isLoggedIn()) {
+                container.style.display = 'none';
+                return;
+            }
+            container.style.display = 'block';
+
+            try {
+                // SỬA API: Dùng /my-orders thay vì đường dẫn cũ
+                const res = await fetchAPI('/orders/my-orders');
+                
+                if (!res.ok) throw new Error('Lỗi tải dữ liệu');
+                
+                const orders = await res.json();
+                if (orders.length === 0) {
+                    listContainer.innerHTML = '<div class="text-center text-muted py-4">Bạn chưa có đơn hàng nào.</div>';
+                    return;
+                }
+
+                let html = '';
+                orders.forEach(order => {
+                    let badge = 'bg-secondary';
+                    let canCancel = false;
+
+                    // Logic màu sắc và quyền hủy
+                    if (order.status === 'Chờ xác nhận') { badge = 'status-pending'; canCancel = true; }
+                    else if (order.status === 'Đang giao') badge = 'status-shipping';
+                    else if (order.status === 'Hoàn thành') badge = 'status-completed';
+                    else if (order.status === 'Hủy') badge = 'status-cancelled';
+
+                    const date = new Date(order.orderDate).toLocaleString('vi-VN');
+                    
+                    // Tạo danh sách món ăn
+                    let itemsHtml = order.items.map(i => `
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>• ${i.productName} (x${i.quantity})</span>
+                            <span>${formatMoney(i.price * i.quantity)}</span>
+                        </div>
+                    `).join('');
+
+                    html += `
+                        <div class="order-card p-3">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-3">
+                                    <div class="fw-bold text-dark">#${order._id.slice(-6).toUpperCase()}</div>
+                                    <div class="small text-muted">${date}</div>
+                                    <div class="mt-2"><span class="badge ${badge}">${order.status}</span></div>
+                                </div>
+                                <div class="col-md-5 border-start border-end px-3">
+                                    ${itemsHtml}
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <div class="small text-muted">Tổng tiền</div>
+                                    <div class="fw-bold text-success fs-5">${formatMoney(order.totalAmount)}</div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    ${canCancel ? `
+                                        <button class="btn btn-outline-danger btn-sm w-100" onclick="cancelMyOrder('${order._id}')">
+                                            <i class="fas fa-times me-1"></i>Hủy đơn
+                                        </button>
+                                    ` : '<button class="btn btn-light btn-sm w-100 disabled text-muted">Chi tiết</button>'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
+
+            } catch (err) {
+                console.error(err);
+                listContainer.innerHTML = '<div class="text-center text-danger">Không thể tải lịch sử đơn hàng.</div>';
+            }
+        }
+
+        async function cancelMyOrder(id) {
+            if(!confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) return;
+            
+            try {
+                const res = await fetchAPI(`/orders/${id}/cancel`, 'PUT');
+                const data = await res.json();
+                if(res.ok) {
+                    alert('Đã hủy đơn hàng!');
+                    loadMyOrders(); // Tải lại danh sách
+                } else {
+                    alert(data.message);
+                }
+            } catch(err) {
+                alert('Lỗi kết nối!');
+            }
+        }
+
+        // CHẠY KHI VÀO TRANG
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+            loadMyOrders();
+        });
+    </script>
+</body>
+</html>

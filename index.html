@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tea&Tea - Thưởng thức vị trà đậm đà</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { font-family: 'Nunito', sans-serif; background-color: #f8f9fa; }
+        
+        /* Hero Banner */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.9), rgba(0, 184, 148, 0.7)), url('https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+            border-radius: 0 0 50px 50px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 184, 148, 0.2);
+        }
+
+        /* Menu Tabs */
+        .category-pills .nav-link {
+            border-radius: 30px;
+            padding: 10px 25px;
+            color: #636e72;
+            font-weight: 700;
+            background-color: white;
+            border: 1px solid #dfe6e9;
+            margin: 0 5px 10px;
+            transition: all 0.3s;
+        }
+        .category-pills .nav-link.active, .category-pills .nav-link:hover {
+            background-color: #00b894;
+            color: white;
+            border-color: #00b894;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        /* Product Card */
+        .product-card {
+            border: none;
+            border-radius: 20px;
+            background: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        .card-img-wrapper {
+            height: 220px;
+            overflow: hidden;
+            background-color: #f1f2f6;
+            position: relative;
+        }
+        .card-img-top {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .product-card:hover .card-img-top {
+            transform: scale(1.1);
+        }
+        .btn-add-cart {
+            border-radius: 12px;
+            font-weight: 700;
+            padding: 10px;
+            background-color: #f1f2f6;
+            color: #2d3436;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-add-cart:hover {
+            background-color: #00b894;
+            color: white;
+        }
+        .price-tag {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #00b894;
+        }
+
+        /* --- Footer Mới Đẹp Mắt --- */
+        .footer-section {
+            background-color: #2d3436;
+            color: #b2bec3;
+            padding-top: 60px;
+            margin-top: 80px;
+        }
+        .footer-title {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        .footer-link {
+            color: #b2bec3;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+        .footer-link:hover {
+            color: #00b894;
+            padding-left: 5px;
+        }
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255,255,255,0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            margin-right: 10px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .social-icon:hover {
+            background-color: #00b894;
+            transform: translateY(-3px);
+        }
+        .copyright-bar {
+            background-color: #22282a;
+            padding: 20px 0;
+            margin-top: 50px;
+        }
+        /* Thêm vào trong thẻ <style> */
+.order-section {
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 30px;
+    margin-top: 50px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+.order-card {
+    border: 1px solid #eee;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+}
+.order-card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: #00b894;
+}
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.status-pending { background-color: #ffeaa7; color: #d35400; } /* Chờ xác nhận */
+.status-shipping { background-color: #74b9ff; color: #0984e3; } /* Đang giao */
+.status-completed { background-color: #55efc4; color: #00b894; } /* Hoàn thành */
+.status-cancelled { background-color: #ff7675; color: #d63031; } /* Hủy */
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-success fs-3" href="index.html">
+                <i class="fas fa-leaf me-2"></i>Tea&Tea
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center" id="nav-auth">
+                    </ul>
+                <a href="cart.html" class="btn btn-dark position-relative ms-3 rounded-pill px-4">
+                    <i class="fas fa-shopping-bag me-2"></i>Giỏ hàng
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">Trà Đậm Đà - Topping Thả Ga</h1>
+            <p class="lead mb-4">Đặt món ngay để nhận ưu đãi Freeship cho đơn hàng đầu tiên!</p>
+            <a href="#menu-area" class="btn btn-light text-success fw-bold btn-lg rounded-pill px-5 shadow">Xem Menu Ngay</a>
+        </div>
+    </header>
+
+    <div class="container" id="menu-area">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold section-title">Thực Đơn Hôm Nay</h2>
+            <p class="text-muted">Chọn danh mục bên dưới để xem món ngon</p>
+        </div>
+
+        <ul class="nav nav-pills justify-content-center category-pills mb-5" id="category-tabs">
+            </ul>
+
+        <div class="row g-4" id="product-list">
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-success" role="status"></div>
+                <p class="mt-2 text-muted">Đang pha chế...</p>
+            </div>
+        </div>
+    </div>
+    
+
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="footer-title"><i class="fas fa-leaf me-2 text-success"></i>Tea&Tea</h5>
+                    <p>Chúng tôi cam kết mang đến những ly trà sữa thơm ngon nhất, sử dụng nguyên liệu sạch và công thức độc quyền. Hãy đến và trải nghiệm!</p>
+                    <div class="mt-4">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="footer-title">Về Chúng Tôi</h5>
+                    <a href="#" class="footer-link">Trang chủ</a>
+                    <a href="#" class="footer-link">Câu chuyện thương hiệu</a>
+                    <a href="#" class="footer-link">Tuyển dụng</a>
+                    <a href="#" class="footer-link">Chính sách bảo mật</a>
+                </div>
+
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="footer-title">Hỗ Trợ</h5>
+                    <a href="#" class="footer-link">Theo dõi đơn hàng</a>
+                    <a href="#" class="footer-link">Chính sách đổi trả</a>
+                    <a href="#" class="footer-link">Phí giao hàng</a>
+                    <a href="#" class="footer-link">Câu hỏi thường gặp</a>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="footer-title">Liên Hệ</h5>
+                    <p><i class="fas fa-map-marker-alt me-2 text-success"></i> 123 Đường Nguyễn Văn Cừ, Quận 5, TP.HCM</p>
+                    <p><i class="fas fa-phone-alt me-2 text-success"></i> 0909 123 456</p>
+                    <p><i class="fas fa-envelope me-2 text-success"></i> contact@teatea.com</p>
+                    <p><i class="fas fa-clock me-2 text-success"></i> 08:00 - 22:00 (Hàng ngày)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright-bar text-center">
+            <div class="container">
+                <small>&copy; 2024 Tea&Tea System. Designed for Graduation Project.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/client.js"></script>
+
+    <script>
+        const sampleImages = [
+            "https://images.unsplash.com/photo-1558160074-4d7d8bdf4256?w=600&q=80",
+            "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=600&q=80",
+            "https://images.unsplash.com/photo-1623689046286-01d812cc9448?w=600&q=80",
+            "https://images.unsplash.com/photo-1579709292350-13f50228d447?w=600&q=80",
+            "https://images.unsplash.com/photo-1546173159-315724a31696?w=600&q=80",
+            "https://images.unsplash.com/photo-1571328003758-4a3921661729?w=600&q=80",
+            "https://images.unsplash.com/photo-1605191262447-750d75b1137c?w=600&q=80",
+            "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=600&q=80"
+        ];
+
+        let allProducts = [];
+        let categories = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadData();
+        });
+
+        async function loadData() {
+            const container = document.getElementById('product-list');
+            try {
+                const res = await fetch('/api/products');
+                if (!res.ok) throw new Error("Lỗi server");
+                allProducts = await res.json();
+
+                if (allProducts.length === 0) {
+                    container.innerHTML = '<div class="col-12 text-center text-muted">Chưa có món nào!</div>';
+                    return;
+                }
+
+                extractCategories();
+                renderCategoryTabs();
+
+                // TỰ ĐỘNG CHỌN DANH MỤC ĐẦU TIÊN
+                if (categories.length > 0) {
+                    const firstCategory = categories[0];
+                    // Tìm nút đầu tiên và kích hoạt nó
+                    const firstBtn = document.querySelector(`.category-pills button[data-cat="${firstCategory}"]`);
+                    filterProducts(firstCategory, firstBtn);
+                }
+
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = `<div class="col-12 text-center text-danger">Lỗi tải dữ liệu: ${error.message}</div>`;
+            }
+        }
+
+        function extractCategories() {
+            const catSet = new Set();
+            allProducts.forEach(p => {
+                if (p.category && p.category.categoryName) {
+                    catSet.add(p.category.categoryName);
+                }
+            });
+            categories = Array.from(catSet);
+        }
+
+        function renderCategoryTabs() {
+            const tabContainer = document.getElementById('category-tabs');
+            let html = '';
+            
+            // Chỉ render các danh mục thực, KHÔNG render nút "Tất cả"
+            categories.forEach(cat => {
+                html += `<li class="nav-item"><button class="nav-link" data-cat="${cat}" onclick="filterProducts('${cat}', this)">${cat}</button></li>`;
+            });
+            tabContainer.innerHTML = html;
+        }
+
+        function filterProducts(categoryName, btnElement) {
+            // Xử lý nút active
+            if (btnElement) {
+                document.querySelectorAll('.category-pills .nav-link').forEach(el => el.classList.remove('active'));
+                btnElement.classList.add('active');
+            }
+
+            // Lọc sản phẩm (Bắt buộc phải theo categoryName)
+            let filtered = allProducts.filter(p => p.category && p.category.categoryName === categoryName);
+
+            renderProducts(null, filtered);
+        }
+
+        function renderProducts(dummy, productArray) {
+            const container = document.getElementById('product-list');
+            let html = '';
+
+            if (productArray.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center py-5 text-muted">Không tìm thấy món nào trong danh mục này.</div>';
+                return;
+            }
+
+            productArray.forEach((p, index) => {
+                let imgUrl = p.imageURL ? `/uploads/${p.imageURL}` : "";
+                if (!imgUrl) {
+                    const sampleIndex = (index + p.price) % sampleImages.length;
+                    imgUrl = sampleImages[sampleIndex];
+                }
+
+                const price = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price);
+
+                html += `
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card product-card h-100 shadow-sm">
+                            <div class="card-img-wrapper">
+                                <img src="${imgUrl}" class="card-img-top" alt="${p.productName}" loading="lazy">
+                                <div class="position-absolute top-0 end-0 p-2">
+                                    <span class="badge bg-white text-dark shadow-sm rounded-pill">${p.category ? p.category.categoryName : 'Khác'}</span>
+                                </div>
+                            </div>
+                            <div class="card-body d-flex flex-column text-center p-3">
+                                <h6 class="fw-bold text-dark text-truncate mb-1" title="${p.productName}">${p.productName}</h6>
+                                <div class="price-tag mb-3">${price}</div>
+                                <button class="btn btn-add-cart w-100 mt-auto" 
+                                    onclick="addToCart('${p._id}', '${p.productName}', ${p.price}, '${imgUrl}')">
+                                    <i class="fas fa-plus me-1"></i> Thêm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- LOGIC LỊCH SỬ ĐƠN HÀNG ---
+
+    // 1. Gọi hàm này khi trang web tải xong
+    document.addEventListener('DOMContentLoaded', () => {
+        // ... (code cũ loadData)
+        loadMyOrders(); // <--- THÊM DÒNG NÀY
+    });
+
+    async function loadMyOrders() {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const container = document.getElementById('order-history-section');
+        const listContainer = document.getElementById('my-orders-list');
+
+        // Nếu chưa đăng nhập thì ẩn phần này đi
+        if (!user) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block'; // Hiện khung
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/orders/my-orders', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (!res.ok) throw new Error('Không thể tải đơn hàng');
+            
+            const orders = await res.json();
+
+            if (orders.length === 0) {
+                listContainer.innerHTML = '<div class="text-center text-muted py-3">Bạn chưa có đơn hàng nào.</div>';
+                return;
+            }
+
+            let html = '';
+            orders.forEach(order => {
+                // Xác định màu trạng thái
+                let statusClass = 'bg-secondary text-white';
+                let canCancel = false;
+
+                if (order.status === 'Chờ xác nhận') {
+                    statusClass = 'status-pending';
+                    canCancel = true; // Chỉ chờ xác nhận mới được hủy
+                } else if (order.status === 'Đang giao') {
+                    statusClass = 'status-shipping';
+                } else if (order.status === 'Hoàn thành') {
+                    statusClass = 'status-completed';
+                } else if (order.status === 'Hủy') {
+                    statusClass = 'status-cancelled';
+                }
+
+                // Format ngày tháng
+                const date = new Date(order.orderDate).toLocaleString('vi-VN');
+                const total = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.totalAmount);
+
+                // Tạo danh sách món ăn trong đơn (chi tiết)
+                let itemsHtml = order.items.map(item => 
+                    `<div><small>• ${item.productName} (x${item.quantity})</small></div>`
+                ).join('');
+
+                // Nút Hủy (Chỉ hiện nếu canCancel = true)
+                const cancelButton = canCancel 
+                    ? `<button class="btn btn-outline-danger btn-sm mt-2" onclick="cancelMyOrder('${order._id}')">
+                         <i class="fas fa-times-circle me-1"></i>Hủy Đơn
+                       </button>` 
+                    : '';
+
+                html += `
+                    <div class="order-card p-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 mb-2 mb-md-0">
+                                <span class="fw-bold text-muted">#${order._id.slice(-6)}</span>
+                                <div class="small text-muted">${date}</div>
+                            </div>
+                            <div class="col-md-5 mb-2 mb-md-0">
+                                ${itemsHtml}
+                            </div>
+                            <div class="col-md-2 text-primary fw-bold">
+                                ${total}
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <span class="status-badge ${statusClass}">${order.status}</span>
+                            </div>
+                            <div class="col-md-1 text-end">
+                                ${cancelButton}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+
+        } catch (error) {
+            console.error(error);
+            listContainer.innerHTML = '<div class="text-center text-danger">Lỗi tải lịch sử đơn hàng.</div>';
+        }
+    }
+
+    // Hàm Hủy Đơn
+    async function cancelMyOrder(orderId) {
+        if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/orders/${orderId}/cancel`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                alert('Đã hủy đơn hàng thành công!');
+                loadMyOrders(); // Tải lại danh sách
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        } catch (error) {
+            alert('Lỗi kết nối server!');
+        }
+    }
+    </script>
+</body>
+</html>

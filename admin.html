@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản trị hệ thống - Tea&Tea</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar { min-height: 100vh; background-color: #2c3e50; color: white; }
+        .sidebar .nav-link { color: #bdc3c7; padding: 15px 20px; cursor: pointer; }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background-color: #34495e; border-left: 4px solid #00b894; }
+        .content-section { display: none; } /* Ẩn tất cả các tab trước */
+        .content-section.active { display: block; } /* Chỉ hiện tab đang chọn */
+        .card-stat { border: none; border-radius: 10px; color: white; }
+        .bg-gradient-1 { background: linear-gradient(45deg, #00b894, #00cec9); }
+        .bg-gradient-2 { background: linear-gradient(45deg, #0984e3, #74b9ff); }
+        .bg-gradient-3 { background: linear-gradient(45deg, #e17055, #fab1a0); }
+        .bg-gradient-4 { background: linear-gradient(45deg, #6c5ce7, #a29bfe); }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 260px;">
+            <a href="index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                <i class="fas fa-leaf me-2 fs-4 text-success"></i>
+                <span class="fs-4 fw-bold">Admin Panel</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="switchTab('dashboard')">
+                        <i class="fas fa-chart-line me-2"></i> Thống Kê
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" onclick="switchTab('orders')">
+                        <i class="fas fa-shopping-bag me-2"></i> Đơn Hàng
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" onclick="switchTab('products')">
+                        <i class="fas fa-box-open me-2"></i> Sản Phẩm
+                    </a>
+                </li>
+            </ul>
+            <hr>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                    <strong>Admin</strong>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                    <li><a class="dropdown-item" href="index.html">Về trang chủ</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" onclick="logout()">Đăng xuất</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="container-fluid p-4 bg-light" style="height: 100vh; overflow-y: auto;">
+            
+            <div id="tab-dashboard" class="content-section active">
+                <h2 class="fw-bold mb-4">Tổng Quan Hệ Thống</h2>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card card-stat bg-gradient-1 p-3">
+                            <h3>Doanh Thu</h3>
+                            <p class="fs-4 fw-bold" id="stat-revenue">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-stat bg-gradient-2 p-3">
+                            <h3>Đơn Hàng</h3>
+                            <p class="fs-4 fw-bold" id="stat-orders">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-stat bg-gradient-3 p-3">
+                            <h3>Sản Phẩm</h3>
+                            <p class="fs-4 fw-bold" id="stat-products">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-stat bg-gradient-4 p-3">
+                            <h3>Khách Hàng</h3>
+                            <p class="fs-4 fw-bold" id="stat-users">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm p-3">
+                    <h5>Biểu đồ doanh thu 7 ngày gần nhất</h5>
+                    <canvas id="revenueChart" height="100"></canvas>
+                </div>
+            </div>
+
+            <div id="tab-orders" class="content-section">
+                <div class="d-flex justify-content-between mb-3">
+                    <h2 class="fw-bold">Quản Lý Đơn Hàng</h2>
+                    <button class="btn btn-primary" onclick="loadOrders()"><i class="fas fa-sync"></i> Làm mới</button>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-products" class="content-section">
+                <div class="d-flex justify-content-between mb-3">
+                    <h2 class="fw-bold">Quản Lý Sản Phẩm</h2>
+                    <button class="btn btn-success" onclick="openProductModal()">
+                        <i class="fas fa-plus"></i> Thêm món mới
+                    </button>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Hình ảnh</th>
+                                    <th>Tên món</th>
+                                    <th>Giá</th>
+                                    <th>Danh mục</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product-list-admin"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thêm Sản Phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <input type="hidden" id="productId"> <div class="mb-3">
+                            <label class="form-label">Tên sản phẩm</label>
+                            <input type="text" class="form-control" id="pName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giá tiền</label>
+                            <input type="number" class="form-control" id="pPrice" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="pDesc"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Danh mục (ID)</label>
+                            <input type="text" class="form-control" id="pCatId" placeholder="Nhập ID Category">
+                            <small class="text-muted">Bạn cần copy _id từ MongoDB của Category dán vào đây</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Hình ảnh</label>
+                            <input type="file" class="form-control" id="pImage">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProduct()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/client.js"></script>
+
+    <script>
+        // 1. KIỂM TRA QUYỀN
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || user.role !== 1) {
+            alert('Truy cập bị từ chối!');
+            window.location.href = 'index.html';
+        }
+
+        // 2. HÀM CHUYỂN TAB
+        function switchTab(tabName) {
+            // Ẩn hết
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            
+            // Hiện tab chọn
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            // Load dữ liệu tương ứng
+            if(tabName === 'dashboard') loadDashboard();
+            if(tabName === 'orders') loadOrders();
+            if(tabName === 'products') loadAdminProducts();
+        }
+
+        // 3. LOGIC DASHBOARD
+        async function loadDashboard() {
+            try {
+                const res = await fetchAPI('/admin/dashboard');
+                const stats = await res.json();
+                
+                document.getElementById('stat-revenue').innerText = formatMoney(stats.totalRevenue);
+                document.getElementById('stat-orders').innerText = stats.totalOrders;
+                document.getElementById('stat-products').innerText = stats.totalProducts;
+                document.getElementById('stat-users').innerText = stats.totalUsers;
+
+                // Vẽ biểu đồ (Demo dữ liệu giả, muốn thật thì gọi API stats revenue)
+                renderChart();
+            } catch (err) { console.error(err); }
+        }
+
+        let myChart = null;
+        function renderChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            if(myChart) myChart.destroy(); // Xóa biểu đồ cũ nếu có
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                    datasets: [{
+                        label: 'Doanh thu (Demo)',
+                        data: [150000, 230000, 180000, 320000, 290000, 450000, 510000],
+                        borderColor: '#00b894',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(0, 184, 148, 0.1)'
+                    }]
+                }
+            });
+        }
+
+        // 4. LOGIC ĐƠN HÀNG (GIỮ NGUYÊN TỪ BÀI TRƯỚC)
+        async function loadOrders() {
+            const tbody = document.getElementById('order-list');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Đang tải...</td></tr>';
+            try {
+                const res = await fetchAPI('/admin/orders');
+                const orders = await res.json();
+                let html = '';
+                orders.forEach(o => {
+                    html += `
+                        <tr>
+                            <td>#${o._id.slice(-6)}</td>
+                            <td>${o.user ? o.user.fullName : 'Ẩn danh'}<br><small>${o.shippingAddress}</small></td>
+                            <td class="fw-bold">${formatMoney(o.totalAmount)}</td>
+                            <td>${new Date(o.orderDate).toLocaleDateString()}</td>
+                            <td><span class="badge bg-secondary">${o.status}</span></td>
+                            <td>
+                                <select class="form-select form-select-sm" onchange="updateOrderStatus('${o._id}', this.value)">
+                                    <option value="">Cập nhật...</option>
+                                    <option value="Đang giao">Đang giao</option>
+                                    <option value="Hoàn thành">Hoàn thành</option>
+                                    <option value="Hủy">Hủy</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch (err) { console.error(err); }
+        }
+
+        async function updateOrderStatus(id, status) {
+            if(!status) return;
+            if(confirm('Đổi trạng thái đơn hàng?')) {
+                await fetchAPI(`/admin/orders/${id}`, 'PUT', { status });
+                loadOrders();
+            }
+        }
+
+        // 5. LOGIC SẢN PHẨM (MỚI)
+        async function loadAdminProducts() {
+            const tbody = document.getElementById('product-list-admin');
+            try {
+                const res = await fetchAPI('/products');
+                const products = await res.json();
+                let html = '';
+                products.forEach(p => {
+                    const img = p.imageURL ? `/uploads/${p.imageURL}` : 'https://placehold.co/50';
+                    const catName = p.category ? p.category.categoryName : 'N/A';
+                    
+                    html += `
+                        <tr>
+                            <td><img src="${img}" width="50" height="50" class="rounded"></td>
+                            <td class="fw-bold">${p.productName}</td>
+                            <td>${formatMoney(p.price)}</td>
+                            <td>${catName}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="editProduct('${p._id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p._id}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch (err) { console.error(err); }
+        }
+
+        // Mở Modal Thêm mới
+        function openProductModal() {
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('modalTitle').innerText = 'Thêm Sản Phẩm';
+            new bootstrap.Modal(document.getElementById('productModal')).show();
+        }
+
+        // Mở Modal Sửa
+        async function editProduct(id) {
+            try {
+                const res = await fetchAPI(`/products/${id}`);
+                const p = await res.json();
+                
+                document.getElementById('productId').value = p._id;
+                document.getElementById('pName').value = p.productName;
+                document.getElementById('pPrice').value = p.price;
+                document.getElementById('pDesc').value = p.description || '';
+                // Lấy ID Category (Lưu ý: object category có thể đã được populate)
+                document.getElementById('pCatId').value = p.category._id || p.category; 
+                
+                document.getElementById('modalTitle').innerText = 'Sửa Sản Phẩm';
+                new bootstrap.Modal(document.getElementById('productModal')).show();
+            } catch (err) { alert('Lỗi tải sản phẩm'); }
+        }
+
+        // Lưu Sản Phẩm (Thêm hoặc Sửa)
+        async function saveProduct() {
+            const id = document.getElementById('productId').value;
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const desc = document.getElementById('pDesc').value;
+            const catId = document.getElementById('pCatId').value;
+            const fileInput = document.getElementById('pImage');
+
+            const formData = new FormData();
+            formData.append('productName', name);
+            formData.append('price', price);
+            formData.append('description', desc);
+            formData.append('categoryId', catId);
+            if(fileInput.files[0]) {
+                formData.append('image', fileInput.files[0]);
+            }
+
+            const token = localStorage.getItem('token');
+            const url = id ? `/api/products/${id}` : '/api/products';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Authorization': `Bearer ${token}` }, // FormData không cần Content-Type header
+                    body: formData
+                });
+
+                if(res.ok) {
+                    alert('Lưu thành công!');
+                    location.reload(); // Tải lại trang cho nhanh
+                } else {
+                    alert('Có lỗi xảy ra!');
+                }
+            } catch (err) { alert('Lỗi hệ thống'); }
+        }
+
+        // Xóa sản phẩm
+        async function deleteProduct(id) {
+            if(confirm('Bạn chắc chắn muốn xóa món này?')) {
+                const res = await fetchAPI(`/products/${id}`, 'DELETE');
+                if(res.ok) {
+                    alert('Đã xóa!');
+                    loadAdminProducts();
+                } else {
+                    alert('Lỗi khi xóa!');
+                }
+            }
+        }
+
+        // Chạy mặc định
+        loadDashboard();
+    </script>
+</body>
+</html>
